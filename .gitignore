@@ -1,0 +1,17 @@
+AlterConf.o
+DataProcess.o
+Gateway.o
+IniFile.o
+InitDaemo.o
+io_service_pool.o
+Log.o
+main.o
+MyService.o
+pgdb.o
+Server.o
+UdpServer.o
+WriteCmd.o
+tags
+log
+config
+recv-data-platform

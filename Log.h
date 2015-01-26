@@ -10,10 +10,7 @@
 #include "log4cplus/consoleappender.h"
 #include "log4cplus/layout.h"  
 
-//#include "const.h"  
-//#include "common.h"  
-//#include "Main_config.h"  
-
+extern char CONFIG_PATH[2048];
 using namespace log4cplus;  
 using namespace log4cplus::helpers;  
 
@@ -45,6 +42,7 @@ class Log
 		//log文件路径及名称  
 		char _log_path[PATH_SIZE];  
 		char _log_name[PATH_SIZE];  
+		char _conf_name[PATH_SIZE];
 };  
 #endif // !defined(AFX_LOG_H__B87F71E3_FFAE_4CFA_A528_3F4F2FF7D69E__INCLUDED_)  
 

@@ -1,16 +1,10 @@
-#include "debug.h"
-#ifdef _MSC_VER
-
-//#define  DEBUG
-#ifndef DEBUG 
-
+#ifdef WIN32
 #include <windows.h>
 #include <stdio.h>
 #include <tchar.h>
-#include "log.h"
+#include "Log.h"
 
 
-extern int log_level;
 extern int Startup();
 
 SERVICE_STATUS          ServiceStatus; 
@@ -25,10 +19,14 @@ bool UnInstallService(const char * szServiceName);
 // Service initialization
 int InitService() 
 { 
-	int result;
-	result = log_output("recv-data-platform started.\n");
-
-	return(result); 
+	// 打开日志  
+	if (!Log::instance().open_log())  
+	{   
+		std::cout << "Log::open_log() failed" << std::endl;  
+		exit(-1);
+	}   
+	NOTICE("准备启动收数软件服务");
+	return 0;
 }
 
 // Control Handler
@@ -37,7 +35,7 @@ void ControlHandler(DWORD request)
    switch(request) 
    { 
       case SERVICE_CONTROL_STOP: 
-         log_output("recv-data-platform stopped.\n");
+		 NOTICE("动收数软件服务已经停止.");
 
          ServiceStatus.dwWin32ExitCode = 0; 
          ServiceStatus.dwCurrentState = SERVICE_STOPPED; 
@@ -45,8 +43,7 @@ void ControlHandler(DWORD request)
          return; 
  
       case SERVICE_CONTROL_SHUTDOWN: 
-         log_output("recv-data-platform stopped.\n");
-
+		 NOTICE("动收数软件服务已经停止.");
          ServiceStatus.dwWin32ExitCode = 0; 
          ServiceStatus.dwCurrentState = SERVICE_STOPPED; 
          SetServiceStatus (hStatus, &ServiceStatus);
@@ -204,6 +201,9 @@ void main(int argc, char* argv[])
 			printf("uninstall recv-data-platform Service complete!\n ");
 		}
 
+	}else if((argc==2) && ((::strcmp(argv[1], "-d")==0)&&(argc==2) && (::strcmp(argv[1], "-D")==0))){
+		printf("DEBUG mode...");
+		 Startup();
 	}
 
    SERVICE_TABLE_ENTRY ServiceTable[2];
@@ -218,5 +218,4 @@ void main(int argc, char* argv[])
    StartServiceCtrlDispatcher(ServiceTable);
 
 }
-#endif
 #endif

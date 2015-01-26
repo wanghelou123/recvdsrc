@@ -3,21 +3,17 @@
 #include <boost/thread.hpp>
 #include <list>
 #include "IniFile.h"
-#include "log.h"
 #include "pgdb.h"
 #include "Server.h"
 #include "WriteCmd.h"
 #include "UdpServer.h"
 #include "InitDaemo.h"
-#include "debug.h"
 #include "io_service_pool.cpp"
 #include "job_queue.hpp"
 #include "work.hpp"
-
 #include "main.h"
 #include "DataProcess.h"
-
-
+#include "Log.h"
 
 bool func_int(int tmp)
 {
@@ -25,47 +21,43 @@ bool func_int(int tmp)
 	return true;
 }
 
-//windows平台
-#ifdef WIN32
-	#ifdef DEBUG 
-		int main(int argc, char * argv[])//windows平台调试模式
-	#else
-		int Startup()//替代main()函数, windows平台正常模式
-	#endif
-#else
-int main(int argc, char * argv[])
+#ifdef WIN32 //=====>windows
+	int Startup()
+#else //======>linux
+	int main(int argc, char * argv[])
 #endif
 
 {
-#ifdef DEBUG	
-#ifdef WIN32
-init_path();//初始化配置文件的路径,windows平台模式
-#endif
-#endif
+#ifndef WIN32//linux
+	// 打开日志  
+	if (!Log::instance().open_log())  
+	{   
+		std::cout << "Log::open_log() failed" << std::endl;  
+		exit(-1);
+	}   
 
-//linux平台
-#ifndef WIN32
-	init_path();//初始化配置文件的路径
-	#ifndef DEBUG
+	if((argc!=2)||(0 != strcmp(argv[1], "-d") && (0 != strcmp(argv[1], "-D")))){
+		cout <<"Daemon mode..." << endl;
 		InitDaemo(argv[0]);
-	#endif
+	}else {
+		cout << "DEBUG mode..."	<<endl;
+	}
 #endif
 
-/*
-		//此段代码用于测试工作队列
-		job_queue<int> q1;
-		q1.push(10);
-		q1.push(11);
-		q1.push(13);
-		q1.push(14);
-		int tmp;
-		q1.wait_and_pop(tmp);
-		cout<<tmp<<endl;
-		cout << "queue size is: "<< q1.size()<<endl;
-		return 0;
+	/*
+	//此段代码用于测试工作队列
+	job_queue<int> q1;
+	q1.push(10);
+	q1.push(11);
+	q1.push(13);
+	q1.push(14);
+	int tmp;
+	q1.wait_and_pop(tmp);
+	cout<<tmp<<endl;
+	cout << "queue size is: "<< q1.size()<<endl;
+	return 0;
 
-*/
-
+	 */
 
 	/*创建队列*/
 	queue_type q;
@@ -78,7 +70,7 @@ init_path();//初始化配置文件的路径,windows平台模式
 	int count=0;
 	while(count < 5){
 		if (init_gateway_conf()<0){ 
-			log_output("init gateway config  failure!\n");
+			FATAL("init gateway config failure!");
 		}else break;
 		this_thread::sleep(posix_time::seconds(30));
 	}
@@ -88,11 +80,11 @@ init_path();//初始化配置文件的路径,windows平台模式
 
 	// 显示这个链表
 	/*
-	list<struct gateway_conf>::iterator theIterator;
-	for( theIterator = gateway_conf_list.begin(); theIterator != gateway_conf_list.end(); theIterator++ )
-		cout << theIterator->gateway_id<<" "<< theIterator->work_mode<<" "<< theIterator->port<<" "\
-		<< theIterator->timeout<<" "<< theIterator->pool_interval<<endl;			
-	*/
+	   list<struct gateway_conf>::iterator theIterator;
+	   for( theIterator = gateway_conf_list.begin(); theIterator != gateway_conf_list.end(); theIterator++ )
+	   cout << theIterator->gateway_id<<" "<< theIterator->work_mode<<" "<< theIterator->port<<" "\
+	   << theIterator->timeout<<" "<< theIterator->pool_interval<<endl;			
+	 */
 
 
 	/*初始化网关对象链表*/
@@ -107,7 +99,7 @@ init_path();//初始化配置文件的路径,windows平台模式
 	/*启动UDP 服务器*/
 	UdpServer s(io_service_pool_.get_io_service(), udpport, q);
 
-	log_output("recv-data-plaform Service start ok!\n" );
+	NOTICE("收数软件启动成功！");
 
 
 	worker<queue_type> w(q, handle_msg,10);
@@ -118,18 +110,16 @@ init_path();//初始化配置文件的路径,windows平台模式
 	return 0;
 }
 
-
-
-
 //初始化数据库变量
 void init_db_conf(){
-	PR_DEBUG();
-
+	DEBUG(__func__);
 	IniFile config(CONFIG_PATH);
 #ifdef ODBC
-	log_level = config.ReadInteger("log", "LOG_LEVEL", 1); 
 	strcpy(dbaddr, config.ReadString("db", "DB_DSN", ""));
-	dbport = 0; 
+#else
+	strcpy(dbaddr, config.ReadString("db", "DB_ADDR", ""));
+#endif
+	dbport = config.ReadInteger("db", "DB_PORT", 0); 
 	strcpy(dbname, config.ReadString("db", "DB_NAME", ""));
 	strcpy(dbuser, config.ReadString("db", "DB_USER", ""));
 	strcpy(dbpwd, config.ReadString("db", "DB_PWD", ""));
@@ -137,23 +127,12 @@ void init_db_conf(){
 	tcpport = config.ReadInteger("db", "TCP_PORT", 502);
 	udpport = config.ReadInteger("db", "UDP_PORT", 8000);
 	record_channel_num_flag = config.ReadInteger("db", "RECORD_CHANNEL_NUM_FLAG", 0);
-#else
-	log_level = config.ReadInteger("log", "LOG_LEVEL", 1); 
-	strcpy(dbaddr, config.ReadString("db", "DB_ADDR", ""));
-	dbport = config.ReadInteger("db", "DB_PORT", 0); 
-	strcpy(dbname, config.ReadString("db", "DB_NAME", ""));
-	strcpy(dbuser, config.ReadString("db", "DB_USER", ""));
-	strcpy(dbpwd, config.ReadString("db", "DB_PWD", ""));
-	tcpport = config.ReadInteger("db", "TCP_PORT", 502);
-	udpport = config.ReadInteger("db", "UDP_PORT", 8000);
-	record_channel_num_flag = config.ReadInteger("db", "RECORD_CHANNEL_NUM_FLAG", 0);
-#endif
 }
 
 
 //查询网关配置，并保存到相应的对象中
 void  init_gateway_object_list(queue_type& m_queue){
-	PR_DEBUG();
+	DEBUG(__func__);
 
 	list<struct gateway_conf>::iterator theIterator;
 	for( theIterator = gateway_conf_list.begin(); theIterator != gateway_conf_list.end(); theIterator++ ){
@@ -173,12 +152,10 @@ void  init_gateway_object_list(queue_type& m_queue){
 
 //从数据库中读出网关的配置，并保存到链表中 
 int  init_gateway_conf(){
-	PR_DEBUG();
+	DEBUG(__func__);
 
 	if (db.ConnectDB(dbaddr, dbport, dbname, dbuser, dbpwd, 60) == -1){				
-		log_output("main.cpp  ConnectDB() failed\n");
-		std::cout<<"main.cpp  connect postgresDB Failed!"<< std::endl;
-		db.DisConnectDB();
+		FATAL("connect DataBase failed!");
 		return -1;
 	}
 
@@ -192,10 +169,6 @@ int  init_gateway_conf(){
 	t = db.DBnfields(res);
 	/**取得字段数量*/
 
-#ifdef	GATEWAY_LIMIT
-	if(i>GATEWAY_LIMIT)
-		i=GATEWAY_LIMIT;
-#endif
 	for(s=0; s<i;s++)
 	{
 		struct gateway_conf  *p_gateway_conf=NULL;
@@ -226,12 +199,10 @@ int  init_gateway_conf(){
 //启动客户端，连接到网关服务器
 void start_client()
 {
-	PR_DEBUG();
+	DEBUG(__func__);
 	list<class  Gateway* >::iterator theIterator;
 	for( theIterator = gateway_object_list.begin(); theIterator != gateway_object_list.end(); theIterator++ ){
-		cout << __LINE__<<endl;
 		(*theIterator)->run_client();
 	}
-	cout << __LINE__<<endl;
 }
 

@@ -1,5 +1,5 @@
 #include "DataProcess.h"
-#include "log.h"
+#include "Log.h"
 #include <boost/timer.hpp>
 
 extern int record_channel_num_flag;
@@ -16,7 +16,7 @@ bool handle_msg(tcp_message_ptr& p)
 
 
 	if(-1 == db.ConnectDB(dbaddr, dbport, dbname, dbuser, dbpwd, 60)){
-		printf("%s connect db fialed\n", __FUNCTION__);
+		FATAL("connect database failed!");
 		return true;
 	}
 
@@ -159,7 +159,6 @@ bool handle_msg(tcp_message_ptr& p)
 				snprintf(sql, sizeof(sql) - 1, "INSERT INTO data (data_time, gateway_logo, sensor_name, channel_name, value, up_state) VALUES (to_timestamp('%s', 'YYYY-MM-DD HH24:MI:SS'), '%s', %d, %d, %.3f, %d);", strTime, p->gateway_id,  p->data[6], dataName, dataValue, 0);
 #endif
 			}
-				//log_output("%s\n", sql);
 				db.InsertData(sql);
 
 			}catch(...){

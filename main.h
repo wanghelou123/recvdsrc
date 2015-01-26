@@ -1,5 +1,5 @@
-#ifndef __MAIN_H_
-#define __MAIN_H_
+#ifndef MAIN_H_
+#define MAIN_H_
 #include "Gateway.h"
 
 #ifdef _MSC_VER
@@ -33,8 +33,4 @@ void start_client();
 
 //创建200个线程
 io_service_pool io_service_pool_(10);
-
-//在此处限制网关的个数
-//#define GATEWAY_LIMIT	5	
-
 #endif

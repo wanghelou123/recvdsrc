@@ -1,0 +1,7 @@
+收数平台软件依赖的库文件
+boost库：
+/lib/libboost_date_time-d.so.1.49.0
+/lib/libboost_system.so.1.49.0
+/lib/libboost_thread-mt.so.1.49.0
+日志库:
+liblog4cplus.so.2.0.0
