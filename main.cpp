@@ -37,10 +37,10 @@ bool func_int(int tmp)
 	}   
 
 	if((argc!=2)||(0 != strcmp(argv[1], "-d") && (0 != strcmp(argv[1], "-D")))){
-		cout <<"Daemon mode..." << endl;
+		cout <<"Linux Daemon mode..." << endl;
 		InitDaemo(argv[0]);
 	}else {
-		cout << "DEBUG mode..."	<<endl;
+		cout << "Linux DEBUG mode..."	<<endl;
 	}
 #endif
 

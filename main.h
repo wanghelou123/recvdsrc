@@ -27,5 +27,5 @@ void start_client();
 
 
 //创建200个线程
-io_service_pool io_service_pool_(10);
+io_service_pool io_service_pool_(30);
 #endif

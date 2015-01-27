@@ -12,9 +12,7 @@
 #include <errno.h>
 #include "Log.h"
 
-#define LOCKFILE "/var/run/recv-data-platform.pid"
 #define LOCKMODE (S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH)
-
 
 void daemonize(const char*cmd)
 {
@@ -99,7 +97,9 @@ already_running(void)
 {
 	int		fd;
 	char	buf[16];
-
+	char LOCKFILE[80]="/var/run/";
+	strcat(LOCKFILE, PROGNAME);
+	strcat(LOCKFILE, ".pid");
 	fd = open(LOCKFILE, O_RDWR|O_CREAT, LOCKMODE);
 	if (fd < 0) {
 		WARNING("can't open:"<<LOCKFILE << " "<< strerror(errno));

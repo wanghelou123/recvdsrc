@@ -29,10 +29,20 @@ Logger Log::_logger = log4cplus::Logger::getInstance("main_log");
 Log::Log()  
 {  
 #ifdef WIN32
-	snprintf(_log_path, sizeof(_log_path), "%s", "log");  
-	snprintf(_log_name, sizeof(_log_name), "%s/%s.%s", _log_path, "error", "log");
-	snprintf(_log_path, sizeof(_log_path), "%s", "config");  
-	snprintf(_conf_name, sizeof(_log_name), "%s/%s.%s", _log_path, "init", "conf");
+	int pos = 0;
+	char buffer[2048]; 
+	memset(buffer, '\0', sizeof(buffer));
+	GetModuleFileName(NULL, buffer, 500);
+	string m_path = string(buffer);
+	while(string::npos != m_path.find('\\'))
+		m_path.replace(m_path.find('\\'),1, 1, '/');
+	pos = m_path.find_last_of('/');
+	m_path.erase(pos, m_path.length()-1);
+
+	snprintf(_log_path, sizeof(_log_path), "%s", m_path.c_str());
+	//cout << "_log_path:"<<_log_path<<endl;
+	snprintf(_log_name, sizeof(_log_name), "%s/log/%s.%s", _log_path, "error", "log");
+	snprintf(_conf_name, sizeof(_log_name), "%s/config/%s.%s", _log_path, "init", "conf");
 #else
 	char proc[2048];
 	char *p;
@@ -47,8 +57,10 @@ Log::Log()
 
 #endif
 	strcpy(CONFIG_PATH, _conf_name);
-	cout << "_log_name: " << _log_name<<endl;
-	cout << "_conf_name: " << _conf_name<<endl;
+
+	//cout << "CONFIG_PATH:"<< CONFIG_PATH<<endl;
+	//cout << "_log_name: " << _log_name<<endl;
+	//cout << "_conf_name: " << _conf_name<<endl;
 	
 }  
 
@@ -87,7 +99,15 @@ bool Log::open_log()
 	Log::_logger.addAppender(_append);  
 
 	/* step 6: Set a priority for the logger，设置记录器的优先级  */  
-	Log::_logger.setLogLevel(Log_level);  
+	/* TRACE_LOG_LEVEL   = 0
+	 * DEBUG_LOG_LEVEL   = 10000
+	 * INFO_LOG_LEVEL    = 20000
+	 * WARN_LOG_LEVEL    = 30000
+	 * ERROR_LOG_LEVEL   = 40000
+	 * FATAL_LOG_LEVEL   = 50000;
+	 * OFF_LOG_LEVEL     = 60000;
+	 */
+	Log::_logger.setLogLevel(Log_level*10000);  
 
 	return true;  
 } 

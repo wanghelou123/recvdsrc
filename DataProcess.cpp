@@ -3,6 +3,7 @@
 #include <boost/timer.hpp>
 
 extern int record_channel_num_flag;
+#ifndef LIGHTSYS
 bool handle_msg(tcp_message_ptr& p)
 {
 	if(p == NULL)return true;
@@ -123,24 +124,6 @@ bool handle_msg(tcp_message_ptr& p)
 		memset(sql, '\0', sizeof(sql));
 
 		try{
-
-
-/*
-#ifdef ODBC
-			snprintf(sql, sizeof(sql) - 1, "UPDATE data set data_time = '%s', value=%.3f, up_state = %d where  gateway_logo='%s' and sensor_name=%d and channel_name=%d;", strTime, dataValue, 0, p->gateway_id,p->data[6], dataName);
-#else
-			snprintf(sql, sizeof(sql) - 1, "UPDATE data set data_time = to_timestamp('%s', 'YYYY-MM-DD HH24:MI:SS'), value=%.3f, up_state = %d where  gateway_logo='%s' and sensor_name=%d and channel_name=%d;", strTime, dataValue, 0, p->gateway_id,p->data[6], dataName[j]);
-#endif
-
-			if(db.UpdateData(sql)<0){
-				memset(sql, '\0', sizeof(sql));
-
-#ifdef DEBUG
-				printf("insert %d,%d\n",p->data[6],dataName);
-#endif 
-		*/
-			
-
 			if(record_flag == 0){
 				snprintf(sql, sizeof(sql) - 1, "delete from  data  where  gateway_logo='%s' and sensor_name=%d ;", p->gateway_id,p->data[6]);
 				record_flag=1;
@@ -171,3 +154,65 @@ bool handle_msg(tcp_message_ptr& p)
 
 		return true;
 }
+#else
+bool handle_msg(tcp_message_ptr& p)
+{
+	if(p == NULL)return true;
+	
+	GatewayDB db;
+	int dataName;       //通道的名称
+	float dataValue;    //通道的值
+	int dataTemp;
+	int i = 0;
+	int record_flag=0;
+	int channel_count=0;
+	char sql[512] = {0};
+
+	memcpy(&dataTemp, p->data+9, 4);
+	if(p->data[10] == 0xa8){
+		channel_count =8;
+	}else if(p->data[10] == 0xa4){
+		channel_count =4;
+	}
+
+
+	if(-1 == db.ConnectDB(dbaddr, dbport, dbname, dbuser, dbpwd, 60)){
+		FATAL("connect database failed!");
+		return true;
+	}
+	
+	for(i=0; i <channel_count; i++){//解析每路数据
+		dataName = 0xb0 | (i+1);
+		dataValue = ((dataTemp&0xff) >> i) & 0x01;
+		memset(sql, '\0', sizeof(sql));
+
+		try{		
+
+			if(record_flag == 0){
+				snprintf(sql, sizeof(sql) - 1, "delete from  data  where  gateway_logo='%s' and sensor_name=%d ;",\
+						 p->gateway_id,p->data[6]);
+				record_flag=1;
+				db.DeleteData(sql);
+			}
+#ifdef ODBC 
+			snprintf(sql, sizeof(sql) - 1, "INSERT INTO data (data_time, gateway_logo, sensor_name, channel_name, value, up_state)\
+										   VALUES ('%s', '%s', %d, %d, %.3f, %d);", p->data+13, p->gateway_id,  p->data[6], dataName, dataValue, 0);				
+#else
+			snprintf(sql, sizeof(sql) - 1, "INSERT INTO data (data_time, gateway_logo, sensor_name, channel_name, value, up_state) \
+										   VALUES (to_timestamp('%s', 'YYYY-MM-DD HH24:MI:SS'), '%s', %d, %d, %.3f, %d);", p->data+13, p->gateway_id,  p->data[6], dataName, dataValue, 0);
+#endif
+					
+
+
+			db.InsertData(sql);
+		}catch(...){
+
+		}	
+
+			
+		}//for() end
+		db.DisConnectDB();
+
+		return true;
+}
+#endif

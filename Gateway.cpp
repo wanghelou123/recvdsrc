@@ -46,6 +46,15 @@ extern list<struct gateway_conf> gateway_conf_list;
 	buf_online_send[11]=0xf7;	//0xf4 表示读取247个节圈
 	sn=0;
 
+#ifdef LIGHTSYS	
+	mysend_buf_success[0]=0x15; mysend_buf_success[1]=0x01; mysend_buf_success[2]=0x00; mysend_buf_success[3]=0x00; 
+	mysend_buf_success[4]=0x00; mysend_buf_success[5]=0x02; mysend_buf_success[6]=0x01; mysend_buf_success[7]=0x60; 
+	mysend_buf_error[0]=0x15; mysend_buf_error[1]=0x01; mysend_buf_error[2]=0x00; mysend_buf_error[3]=0x00; 
+	mysend_buf_error[4]=0x00; mysend_buf_error[5]=0x02; mysend_buf_error[6]=0x01; mysend_buf_error[7]=0xE0; 
+	mysend_buf_error[7]=0x01;
+#endif
+
+
 	sockfd = new asio::ip::tcp::socket(ios);
 	async_timer = new asio::deadline_timer( ios, posix_time::seconds(1) );
 	wait_timer = new asio::deadline_timer( ios, posix_time::seconds(1) );
@@ -78,7 +87,7 @@ void Gateway::run_client()
 {
 	DEBUG(__func__);
 	if(dns() == false) { 
-		DEBUG("DNS failure!");
+		DEBUG(__func__<<":DNS failure!");
 	}
 	sockfd->async_connect(ep, m_strand.wrap(bind(&Gateway::OnConnect, this, asio::placeholders::error)));
 }
@@ -95,7 +104,6 @@ bool Gateway::dns(void)
 	if (iter == end || ec != 0) return false;
 	ep = *iter;
 	DEBUG(__func__<<":"<<gateway_id <<" ->ip"<< ep.address());
-	//sockfd->remote_endpoint().address().to_string().c_str(), sockfd->remote_endpoint().port();
 	return true;
 }
 
@@ -190,6 +198,7 @@ void Gateway::shake_handler(const boost::system::error_code& ec,std::size_t byte
 	}else if(22 == bytes_transferred){//16字节新序列号
 		memcpy(gateway_logo, &ref->data[6], 16);
 	}else{
+		FATAL(__func__<<":shake failed!");
 		delete this;
 		return;
 	}
@@ -250,7 +259,14 @@ void Gateway::shake_handler(const boost::system::error_code& ec,std::size_t byte
 
 
 	}else{//查询应答方式
+#ifdef LIGHTSYS
+		//DEBUG("LIGHTSYS");
+		tcp_message_ptr	reftemp = new struct tcp_message;
+		sockfd->async_read_some(asio::buffer(reftemp->data, 33), m_strand.wrap(bind(&Gateway::myrecv, this,\
+										asio::placeholders::error, asio::placeholders::bytes_transferred, reftemp)));
+#else
 		JudgeGatewayType();
+#endif
 	}	
 }
 
@@ -597,16 +613,16 @@ void Gateway::recvInitiativeDataReturn(const boost::system::error_code& ec, std:
 	}else if(bytes_transferred == 12 && ref->data[0]==0x15 && ref->data[1] == 0x01 && ref->data[5] == 0x06 &&\
 			ref->data[6] == 0xff && ref->data[7] == 0x10 && ref->data[9] == 0x31&& ref->data[11] == 0x06){   /*对时命令成功*/
 		//正确响应包：15 01  00 00  00 06  FF   10   00 31   00 0A
-		printf("correction timer success!\n");
+		DEBUG(__func__<<":correction timer success!");
 		UpdateStatus(ref->data,sn);
 
 		boost::system::error_code ec; 
 		recvInitiativeData(ec, 0);
 
 	}else if(bytes_transferred == 9 && ref->data[0]==0x15 && ref->data[1] == 0x01 && ref->data[5] == 0x03 && \
-			ref->data[6] == 0xff && ref->data[7] == 0x90 && ref->data[8] == 0x01){ /*对时命令失败*/
+		ref->data[6] == 0xff && ref->data[7] == 0x90 && ref->data[8] == 0x01){ /*对时命令失败*/
 		//错误响应包：15 01  00 00  00 03 FF 90 01（02/03/04）
-		printf("correction timer failure!\n");
+		FATAL(__func__<<":correction timer failure!");
 		UpdateStatus(ref->data,sn);
 		boost::system::error_code ec; 
 		recvInitiativeData(ec, 0);
@@ -648,7 +664,7 @@ void Gateway::selfCorrectTime(const boost::system::error_code& ec)
 		ret = sockfd->write_some(asio::buffer(send_buf,25));
 
 	}catch(...){
-		FATAL("write_some error ");
+		FATAL(__func__<<":write_some error!");
 		restart(ec);
 		return;
 	}
@@ -659,4 +675,60 @@ void Gateway::selfCorrectTime(const boost::system::error_code& ec)
 	async_timer->expires_from_now(posix_time::minutes(duration_min) );
 	async_timer->async_wait(m_strand.wrap(bind(&Gateway::selfCorrectTime, this, asio::placeholders::error)));
 
+}
+
+void Gateway::myrecv(const boost::system::error_code& ec,std::size_t bytes_transferred, tcp_message_ptr ref)
+{
+	DEBUG(__func__);
+		if(ec){
+				WARNING(__func__ << ":" << gateway_id << ":" << boost::system::system_error(ec).what());
+				delete this;
+				return;  
+		}
+		cout << __func__ << ": recv bytes:"<< bytes_transferred<<endl;
+		if(bytes_transferred == 33 && ref->data[0]==0x15 && ref->data[1] == 0x01 \
+						&& ref->data[2]==0x00 && ref->data[3]==0x00 && ref->data[4]==0x00 && ref->data[5] == 0x1A ){
+
+				ref->size=bytes_transferred;
+				memset(ref->gateway_id, '\0', sizeof(ref->gateway_id));
+				strcpy(ref->gateway_id,gateway_id);
+				m_queue.push(ref);
+				sockfd->async_write_some(asio::buffer(mysend_buf_success,8), m_strand.wrap(bind(&Gateway::mysendVerification,\
+												this, boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred)));
+				cout << __func__ << ":send over"<<endl;
+		}else if(bytes_transferred == 12 && ref->data[0]==0x15 && ref->data[1] == 0x01 && ref->data[5] == 0x06 &&\
+						ref->data[6] == 0xff && ref->data[7] == 0x10 && ref->data[9] == 0x31&& ref->data[11] == 0x0A){   /*对时命令成功*/
+				//正确响应包：15 01  00 00  00 06  FF   10   00 31   00 0A
+
+				DEBUG("correction timer success!");
+				UpdateStatus(ref->data,sn);
+
+				boost::system::error_code ec; 
+				mysendVerification(ec, 0);
+		}else if(bytes_transferred == 9 && ref->data[0]==0x15 && ref->data[1] == 0x01 && ref->data[5] == 0x03 && \
+						ref->data[6] == 0xff && ref->data[7] == 0x90 && ref->data[8] == 0x01){ /*对时命令失败*/
+				//错误响应包：15 01  00 00  00 03 FF 90 01（02/03/04）
+				FATAL("correction timer failure!");
+				boost::system::error_code ec; 
+				mysendVerification(ec, 0);
+
+		}else{
+				FATAL(__func__<<":recv error");
+				sockfd->async_write_some(asio::buffer(mysend_buf_error,9), m_strand.wrap(bind(&Gateway::mysendVerification,\
+												this, boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred)));
+		}
+}
+
+void Gateway::mysendVerification(const boost::system::error_code& ec, std::size_t bytes_transferred)
+{
+	DEBUG(__func__);
+		if(ec){  
+				WARNING(__func__ << ":" << gateway_id << ":" << boost::system::system_error(ec).what());
+
+				restart(ec);
+				return;  
+		}
+		tcp_message_ptr	reftemp = new struct tcp_message;
+		sockfd->async_read_some(asio::buffer(reftemp->data, 33), m_strand.wrap(bind(&Gateway::myrecv, this,\
+										asio::placeholders::error, asio::placeholders::bytes_transferred, reftemp)));
 }

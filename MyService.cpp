@@ -33,7 +33,7 @@ void ControlHandler(DWORD request)
    switch(request) 
    { 
       case SERVICE_CONTROL_STOP: 
-		 NOTICE("动收数软件服务已经停止.");
+		 NOTICE("收数软件服务已经停止.");
 
          ServiceStatus.dwWin32ExitCode = 0; 
          ServiceStatus.dwCurrentState = SERVICE_STOPPED; 
@@ -41,7 +41,7 @@ void ControlHandler(DWORD request)
          return; 
  
       case SERVICE_CONTROL_SHUTDOWN: 
-		 NOTICE("动收数软件服务已经停止.");
+		 NOTICE("收数软件服务已经停止.");
          ServiceStatus.dwWin32ExitCode = 0; 
          ServiceStatus.dwCurrentState = SERVICE_STOPPED; 
          SetServiceStatus (hStatus, &ServiceStatus);
@@ -74,7 +74,7 @@ void ServiceMain(int argc, char** argv)
    ServiceStatus.dwWaitHint = 0; 
  
    hStatus = RegisterServiceCtrlHandler(
-      "recv-data-platform", 
+      PROGNAME, 
       (LPHANDLER_FUNCTION)ControlHandler); 
    if (hStatus == (SERVICE_STATUS_HANDLE)0) 
    { 
@@ -118,7 +118,7 @@ void InstallService(const char * szServiceName)
 	::CloseServiceHandle(hService);
 	::CloseServiceHandle(handle);
 
-	printf("install recv-data-platform Service  complete!\n");
+	printf("install %s Service  complete!\n", szServiceName);
 }
 
 
@@ -185,20 +185,20 @@ void main(int argc, char* argv[])
 	if ((argc==2) && (::strcmp(argv[1], "install")==0))
 	{
 
-		printf("installing recv-data-platform...\n");
-		InstallService("recv-data-platform");
+		printf("installing %s...\n", PROGNAME);
+		InstallService(PROGNAME);
 		return ;
 
 	}else if((argc==2) && (::strcmp(argv[1], "uninstall")==0))
 	{
 
-		printf("unistalling recv-data-platform...\n");	
-		if(UnInstallService("recv-data-platform") ) {
-			printf("uninstall recv-data-platform Service complete!\n ");
+		printf("unistalling %s...\n", PROGNAME);	
+		if(UnInstallService(PROGNAME) ) {
+			printf("uninstall %s Service complete!\n ",PROGNAME);
 		}
 
 	}else if((argc==2) && ((::strcmp(argv[1], "-d")==0)|| (::strcmp(argv[1], "-D")==0))){
-		printf("DEBUG mode...\n");
+		printf("windows DEBUG mode...\n");
 		// 打开日志  
 		if (!Log::instance().open_log())  
 		{   
@@ -210,7 +210,7 @@ void main(int argc, char* argv[])
     }  
 
    SERVICE_TABLE_ENTRY ServiceTable[2];
-   ServiceTable[0].lpServiceName = "recv-data-platform";
+   ServiceTable[0].lpServiceName = PROGNAME;
    ServiceTable[0].lpServiceProc = (LPSERVICE_MAIN_FUNCTION)ServiceMain;
 
    ServiceTable[1].lpServiceName = NULL;

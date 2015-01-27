@@ -17,8 +17,9 @@
 #include "pgdb.h"
 #include "IniFile.h"
 #include "job_queue.hpp"
-//#include "tcp_message.hpp"
-//class tcp_message;
+
+#define LIGHTSYS//上海照明灯系统
+
 using namespace std;
 using namespace boost;
 
@@ -77,8 +78,9 @@ public:
 	void SendWriteCmdVerification(const boost::system::error_code& ec, std::size_t bytes_transferred);
 	void RecvWriteCmdReturn(const boost::system::error_code& ec, std::size_t bytes_transferred);
 	int UpdateStatus(unsigned char *buf_recv,int sn);
-	int AddNewNodeListToDB();
-	int ConfNode();
+	void myrecv(const boost::system::error_code& ec,std::size_t bytes_transferred, tcp_message_ptr ref);
+	void mysendVerification(const boost::system::error_code& ec, std::size_t bytes_transferred);
+
 
 	//主动上报方式
 	void recvInitiativeData(const boost::system::error_code& ec, std::size_t bytes_transferred);
@@ -132,6 +134,9 @@ private:
 
 	struct correctTime targetCorrectTime;
 
+private://上海照明灯系统
+	unsigned char mysend_buf_success[8];
+	unsigned char mysend_buf_error[8];
 };
 
 #endif               
