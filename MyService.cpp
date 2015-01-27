@@ -4,7 +4,6 @@
 #include <tchar.h>
 #include "Log.h"
 
-
 extern int Startup();
 
 SERVICE_STATUS          ServiceStatus; 
@@ -14,7 +13,6 @@ void  ControlHandler(DWORD request);
 int InitService();
 void InstallService(const char * szServiceName);
 bool UnInstallService(const char * szServiceName);
-
 
 // Service initialization
 int InitService() 
@@ -83,8 +81,6 @@ void ServiceMain(int argc, char** argv)
       // Registering Control Handler failed
       return; 
    }  
-
-	init_path();//初始化配置文件的路径
 
    // Initialize Service 
    error = InitService(); 
@@ -201,10 +197,17 @@ void main(int argc, char* argv[])
 			printf("uninstall recv-data-platform Service complete!\n ");
 		}
 
-	}else if((argc==2) && ((::strcmp(argv[1], "-d")==0)&&(argc==2) && (::strcmp(argv[1], "-D")==0))){
-		printf("DEBUG mode...");
-		 Startup();
-	}
+	}else if((argc==2) && ((::strcmp(argv[1], "-d")==0)|| (::strcmp(argv[1], "-D")==0))){
+		printf("DEBUG mode...\n");
+		// 打开日志  
+		if (!Log::instance().open_log())  
+		{   
+			std::cout << "Log::open_log() failed" << std::endl;  
+			exit(-1);
+		}   
+		NOTICE("准备启动收数软件服务");
+        Startup();
+    }  
 
    SERVICE_TABLE_ENTRY ServiceTable[2];
    ServiceTable[0].lpServiceName = "recv-data-platform";

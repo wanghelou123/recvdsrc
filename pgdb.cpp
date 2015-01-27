@@ -246,7 +246,7 @@ int GatewayDB::DeleteData(const char * sql){
 		FATAL( "SQL:"<<sql<<"\nSQLExecDirect error, recode:"<< retcode);
 		return -1;	
 	}	
-
+	SQLCancel(hstmt1);
 	return retcode;
 }
 
@@ -271,9 +271,8 @@ int GatewayDB::InsertData(const char * sql){
 	//if(w_sql != NULL)free(w_sql);
 	if(retcode != SQL_SUCCESS &&  retcode != SQL_SUCCESS_WITH_INFO){
 		FATAL( "SQL:"<<sql<<"\nSQLExecDirect error, recode:"<< retcode);
-		return -1;	
 	}	
-
+	SQLCancel(hstmt1);  
 	return retcode;
 }
 
@@ -290,7 +289,6 @@ DBresult * GatewayDB::SelectData(const char * sql){
 	//	printf("sql: %s\n", sql);
 	if(retcode != SQL_SUCCESS &&  retcode != SQL_SUCCESS_WITH_INFO){
 		FATAL( "SQL:"<<sql<<"\nSQLExecDirect error, recode:"<< retcode);
-		return -1;	
 	}	
 	return &hstmt1;
 }		

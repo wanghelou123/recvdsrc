@@ -13,22 +13,15 @@ using namespace std;
 
 #ifdef ODBC 
 
-/************ODBC STRT************/
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>      
+/************ODBC STRT************/   
+#include <windows.h> 
 #include <sql.h>      
 #include <sqlext.h>      
 #include <sqltypes.h>      
 #include <odbcss.h>
-#define WIN32_LEAN_AND_MEAN
-//SQLHENV henv = SQL_NULL_HENV;   
-//SQLHDBC hdbc1 = SQL_NULL_HDBC; 
-//SQLHSTMT hstmt1 = SQL_NULL_HSTMT;  
 #define DBresult SQLHSTMT  //记录集类型
 #define DBconn   SQLHDBC    //数据库连接句柄
-
 #else
-
 /*************postgres start***************/
 #include <libpq-fe.h>
 #include <postgres_ext.h>

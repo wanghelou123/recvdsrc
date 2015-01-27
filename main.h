@@ -1,11 +1,6 @@
 #ifndef MAIN_H_
 #define MAIN_H_
 #include "Gateway.h"
-
-#ifdef _MSC_VER
-#define WIN32
-#endif
-
 using namespace std;
 using namespace boost;
 

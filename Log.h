@@ -10,6 +10,11 @@
 #include "log4cplus/consoleappender.h"
 #include "log4cplus/layout.h"  
 
+#ifdef WIN32
+#define	__func__	__FUNCTION__
+#define	snprintf	_snprintf
+#endif
+
 extern char CONFIG_PATH[2048];
 using namespace log4cplus;  
 using namespace log4cplus::helpers;  
