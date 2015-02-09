@@ -9,7 +9,6 @@ list<class Gateway* > gateway_object_list;
 static GatewayDB db;
 
 //数据加接时需要的变量
-int log_level;
 char dbaddr[50];
 int dbport ; 
 char dbname[50];
@@ -19,6 +18,7 @@ char dbtype[50];
 int	tcpport;
 int	udpport;
 int record_channel_num_flag;
+int polling_unit;
 
 void init_db_conf();
 void init_gateway_object_list(queue_type& m_queue);

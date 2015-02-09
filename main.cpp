@@ -131,6 +131,7 @@ void init_db_conf(){
 	tcpport = config.ReadInteger("db", "TCP_PORT", 502);
 	udpport = config.ReadInteger("db", "UDP_PORT", 8000);
 	record_channel_num_flag = config.ReadInteger("db", "RECORD_CHANNEL_NUM_FLAG", 0);
+	polling_unit = config.ReadInteger("db", "POLLING_UNIT", 0);
 }
 
 
@@ -187,7 +188,11 @@ int  init_gateway_conf(){
 		p_gateway_conf->work_mode = atoi(db.DBgetvalue(res,s,1));                                 
 		strcpy(p_gateway_conf->gateway_id,gateway_id);		
 		p_gateway_conf->port = atoi(db.DBgetvalue(res,s,2));
-		p_gateway_conf->pool_interval=60*(atoi(db.DBgetvalue(res,s,4)));
+		if(0 == polling_unit) {
+			p_gateway_conf->pool_interval=60*(atoi(db.DBgetvalue(res,s,4)));
+		} else {
+			p_gateway_conf->pool_interval=atoi(db.DBgetvalue(res,s,4));
+		}
 		p_gateway_conf->timeout=atoi(db.DBgetvalue(res,s,5));
 
 		gateway_conf_list.push_back(*p_gateway_conf);

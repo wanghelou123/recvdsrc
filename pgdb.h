@@ -30,7 +30,6 @@ using namespace std;
 /*************postgres end*****************/
 #endif
 
-extern  int log_level;
 extern  char dbaddr[50];
 extern  int dbport ; 
 extern  char dbname[50];

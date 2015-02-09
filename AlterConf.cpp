@@ -8,6 +8,7 @@
 extern list<class Gateway* > gateway_object_list;
 extern list<struct gateway_conf> gateway_conf_list;
 extern io_service_pool io_service_pool_;
+extern int polling_unit;
 
 AlterConf::AlterConf(boost::asio::io_service& io){
 
@@ -64,7 +65,11 @@ int AlterConf::AddGateway(char * tmp_gateway_logo, queue_type& m_queue)
 	p_gateway_conf->work_mode = atoi(db.DBgetvalue(res,0,1));
 	strcpy(p_gateway_conf->gateway_id,gateway_id);
 	p_gateway_conf->port = atoi(db.DBgetvalue(res,0,2));
-	p_gateway_conf->pool_interval=60*(atoi(db.DBgetvalue(res,0,4)));
+	if(0 == polling_unit) {
+		p_gateway_conf->pool_interval=60*(atoi(db.DBgetvalue(res,0,4)));
+	}else {
+		p_gateway_conf->pool_interval=atoi(db.DBgetvalue(res,0,4));
+	}
 	p_gateway_conf->timeout=atoi(db.DBgetvalue(res,0,5));
 
 	/*将新网关配置添加到网关配置链表*/
