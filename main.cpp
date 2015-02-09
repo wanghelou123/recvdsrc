@@ -102,7 +102,11 @@ bool func_int(int tmp)
 	NOTICE("收数软件启动成功！");
 
 
+#ifndef LIGHTSYS
 	worker<queue_type> w(q, handle_msg,10);
+#else
+	worker<queue_type> w(q, handle_msg,1);
+#endif
 	w.start();
 
 	io_service_pool_.join();//等待线程退出

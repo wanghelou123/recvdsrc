@@ -12,6 +12,7 @@ Server.o
 UdpServer.o
 WriteCmd.o
 tags
-log
-config
+/log
+/config
 recv-data-platform
+Makefile
