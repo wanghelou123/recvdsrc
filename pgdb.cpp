@@ -227,7 +227,7 @@ int GatewayDB::UpdateData(const char * sql){
 	retcode = SQLSetStmtAttr (hstmt1, SQL_ATTR_CURSOR_TYPE, (SQLPOINTER)SQL_CURSOR_KEYSET_DRIVEN, 0);
 	retcode = SQLExecDirect (hstmt1, (SQLCHAR *)sql, SQL_NTS);
 	if(retcode != SQL_SUCCESS &&  retcode != SQL_SUCCESS_WITH_INFO){
-		DEBUG( "SQL:"<<sql<<"\nSQLExecDirect error, recode:"<< retcode);
+		FATAL( "SQL:"<<sql<<"\nSQLExecDirect error, recode:"<< retcode);
 		return -1;	
 	}	
 
@@ -243,7 +243,7 @@ int GatewayDB::DeleteData(const char * sql){
 	retcode = SQLExecDirect (hstmt1, (SQLCHAR *)sql, SQL_NTS);
 
 	if(retcode != SQL_SUCCESS &&  retcode != SQL_SUCCESS_WITH_INFO){
-		DEBUG( "SQL:"<<sql<<"\nSQLExecDirect error, recode:"<< retcode);
+		FATAL( "SQL:"<<sql<<"\nSQLExecDirect error, recode:"<< retcode);
 		return -1;	
 	}	
 	SQLCancel(hstmt1);
