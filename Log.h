@@ -18,7 +18,6 @@
 extern char CONFIG_PATH[2048];
 using namespace log4cplus;  
 using namespace log4cplus::helpers;  
-#define PROGNAME	"recv-data-platform"
 #define  PATH_SIZE	100
 //ÈÕÖ¾·â×°  
 #define TRACE(p) LOG4CPLUS_TRACE(Log::_logger, p)  

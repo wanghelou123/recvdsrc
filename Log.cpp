@@ -81,7 +81,8 @@ bool Log::open_log()
 	int Log_level = config.ReadInteger("log", "LOG_LEVEL", 1);
 
 	/* step 1: Instantiate an appender object,实例化一个挂接器对象 */  
-	SharedAppenderPtr _append(new FileAppender(_log_name, LOG4CPLUS_FSTREAM_NAMESPACE::ios::app,true)); //文件挂接器
+	//SharedAppenderPtr _append(new FileAppender(_log_name, LOG4CPLUS_FSTREAM_NAMESPACE::ios::app,true)); //文件挂接器
+	SharedAppenderPtr _append(new RollingFileAppender(_log_name,1024*1024, 5, true)); //文件挂接器,每个文件1MB,6个文件
 	//SharedAppenderPtr _append(new ConsoleAppender());//控制台挂接器
 	_append->setName("file log test");  
 

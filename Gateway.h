@@ -18,8 +18,6 @@
 #include "IniFile.h"
 #include "job_queue.hpp"
 
-//#define LIGHTSYS//上海照明灯系统
-
 using namespace std;
 using namespace boost;
 

@@ -99,7 +99,7 @@ bool func_int(int tmp)
 	/*启动UDP 服务器*/
 	UdpServer s(io_service_pool_.get_io_service(), udpport, q);
 
-	NOTICE("收数软件启动成功！");
+	NOTICE("收数软件"<< RECVD_TYPE << RECVD_VERSION << "启动成功！");
 
 
 #ifndef LIGHTSYS
