@@ -13,6 +13,5 @@ UdpServer.o
 WriteCmd.o
 tags
 /log
-/config
 recv-data-platform
 Makefile
