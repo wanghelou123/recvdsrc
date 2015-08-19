@@ -1,6 +1,8 @@
+#照明灯系统
+APP=lightsysd
 
-APP=lightsysd		#照明灯系统
-#APP := recv-data-platform	#标准收数软件 
+#标准收数软件 
+#APP := recv-data-platform
 
 CFLAGS :=  -Wall 
 CFLAGS +=  -D RECVD_VERSION=\"v2.0.9\"
