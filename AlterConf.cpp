@@ -163,9 +163,9 @@ int AlterConf::DelGateway(char * tmp_gateway_logo)
 		if(0 == strcmp(gateway_logo, (*theIterator)->gateway_id))break;
 	}
 	if(theIterator != gateway_object_list.end()){//网关对象链表中有该网关
-		delete	*theIterator;
 		/*在链表中删除该对象*/
 		gateway_object_list.remove(*theIterator);
+		delete	*theIterator;
 	}
 
 	/*网关配置表*/

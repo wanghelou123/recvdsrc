@@ -67,17 +67,17 @@ extern list<struct gateway_conf> gateway_conf_list;
 Gateway::~Gateway()
 {
 
-	if(1==work_status){
+//	if(1==work_status){
 		work_status=0;
 
-		//	sockfd->shutdown(boost::asio::ip::tcp::socket::shutdown_both);
+			sockfd->shutdown(boost::asio::ip::tcp::socket::shutdown_both);
 		//	sockfd->close();
 		//	async_timer->cancel();
 		//	wait_timer->cancel();
 		delete sockfd;
 		delete async_timer;
 		delete wait_timer;
-	}
+//	}
 
 	DEBUG(__func__<<" :"<< gateway_id);
 }
@@ -163,12 +163,13 @@ void Gateway::shake_handler(const boost::system::error_code& ec,std::size_t byte
 	//检测协议单元标识符和长度是否正确
 	if (ref->data[2]!=0x22||ref->data[3]!=0x22||ref->data[4]!=0x00||(ref->data[5]!=0x08 && ref->data[5]!=0x10) ) {
 #ifdef DEBUG
-		DEBUG("bytes_transferred: " << bytes_transferred);
+		DEBUG(__func__<<":bytes_transferred: " << bytes_transferred);
+		char tmp[100]={0};
 		for(int i = 0; i < 22; i++)
 		{
-			printf("%.2x ", ref->data[i]);
+			snprintf(tmp+i*3, sizeof(tmp), "%.2x ", ref->data[i]);
 		}
-		printf("\n");
+		DEBUG(tmp);
 #endif		
 
 		ref->data[5]=(char)0x01;
@@ -176,8 +177,8 @@ void Gateway::shake_handler(const boost::system::error_code& ec,std::size_t byte
 		try{
 			sockfd->write_some(asio::buffer(ref->data,7));
 		}catch(...){
-			FATAL("write_some error");
-			restart(ec);
+			FATAL(__func__ << ":write_some error,when respone the right packet!");
+			delete this;
 			return;
 		}
 		delete this;
@@ -231,12 +232,26 @@ void Gateway::shake_handler(const boost::system::error_code& ec,std::size_t byte
 		sockfd->write_some(asio::buffer(ref->data,7));
 	}catch(...){
 		FATAL(__func__ << ":write_some error");
-		restart(ec);
+		delete this;
 		return;
 	}
 	//set the gateway status is working
 	work_status=1;
 
+
+	//在插当对象之前，先检查一下对象链表中有没有以前没有清除的对象，如果有则先清除
+	list<class Gateway* >::iterator pIterator;
+	for( pIterator = gateway_object_list.begin(); pIterator != gateway_object_list.end(); pIterator++ ){
+		if(strcmp((*pIterator)->gateway_id, this->gateway_id)==0) {
+			NOTICE("will delete the gateway object:"<< (*pIterator)->gateway_id<< " from gateway object list.");
+			gateway_object_list.remove(*pIterator);
+			delete *pIterator;
+			break;
+		}
+	}
+
+
+	//将当前对象插入到链表中
 	gateway_object_list.push_front(this);
 
 	time(&time_start);		
@@ -260,7 +275,6 @@ void Gateway::shake_handler(const boost::system::error_code& ec,std::size_t byte
 
 	}else{//查询应答方式
 #ifdef LIGHTSYS
-		//DEBUG("LIGHTSYS");
 		tcp_message_ptr	reftemp = new struct tcp_message;
 		sockfd->async_read_some(asio::buffer(reftemp->data, 33), m_strand.wrap(bind(&Gateway::myrecv, this,\
 										asio::placeholders::error, asio::placeholders::bytes_transferred, reftemp)));
@@ -442,6 +456,7 @@ void Gateway::RecvWriteCmdReturn(const boost::system::error_code& ec, std::size_
 {
 	if(ec){
 		WARNING(__func__ << ":" << gateway_id << ":" << boost::system::system_error(ec).what());
+		restart(ec);
 	}
 
 	UpdateStatus(buf_recv,sn);

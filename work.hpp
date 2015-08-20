@@ -62,7 +62,7 @@ class worker
 				m_queue.wait_and_pop(job);
 				if(!m_func || !m_func(job)) break;
 
-#if 1
+#if 0
 				count++;
 				if(count % 128 == 0){
 					DEBUG("operate 2 gateway,128 records  use:"<< t.elapsed()<<"seconds.");	

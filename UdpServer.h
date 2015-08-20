@@ -33,7 +33,7 @@ private:
 private:
 	boost::asio::io_service& io_service_;
 	udp::socket socket_;
-	udp::endpoint sender_endpoint_;
+	udp::endpoint remote_endpoint_;
 	enum { max_length = 1024 };
 	unsigned char data_[max_length];
 	timer_pt async_timer;
