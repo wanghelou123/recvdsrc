@@ -13,11 +13,10 @@
 #include <dirent.h>
 #endif
 
+int appender_object=1;
 char CONFIG_PATH[2048];
 
 using namespace std;
-
-
 
 //////////////////////////////////////////////////////////////////////  
 // Construction/Destruction  
@@ -80,14 +79,21 @@ bool Log::open_log()
 	IniFile config(_conf_name);
 	int Log_level = config.ReadInteger("log", "LOG_LEVEL", 1);
 
-	/* step 1: Instantiate an appender object,实例化一个挂接器对象 */  
-	//SharedAppenderPtr _append(new FileAppender(_log_name, LOG4CPLUS_FSTREAM_NAMESPACE::ios::app,true)); //文件挂接器
-	SharedAppenderPtr _append(new RollingFileAppender(_log_name,1024*1024, 5, true)); //文件挂接器,每个文件1MB,6个文件
-	//SharedAppenderPtr _append(new ConsoleAppender());//控制台挂接器
-	_append->setName("file log test");  
+	SharedAppenderPtr _append;
+	/*日志写到文件中*/
+	if(appender_object) {
+		//SharedAppenderPtr _append(new RollingFileAppender(_log_name,1024*1024, 5, true)); //文件挂接器,每个文件1MB,6个文件
+		_append = new RollingFileAppender(_log_name,1024*1024, 5, true); //文件挂接器,每个文件1MB,6个文件
+		_append->setName("file log");  
+	}/*日志写到控制台上*/
+	else {
+		/* step 1: Instantiate an appender object,实例化一个挂接器对象 */  
+		//SharedAppenderPtr _append(new ConsoleAppender());//控制台挂接器
+		_append = new ConsoleAppender();//控制台挂接器
+		_append->setName("consolelog");  
+	}
 
 	/* step 2: Instantiate a layout object，实例化一个布局器对象，控制输出信息的格式*/  
-	//std::string pattern = "[%d{%m/%d/%y %H:%M:%S}] [%p] [%t] - %m %l%n";
 	std::string pattern = "[%D{%m/%d/%y %H:%M:%S}] [%p] [%t] - %m %l%n";
 	std::auto_ptr<Layout> _layout(new PatternLayout(pattern));  
 

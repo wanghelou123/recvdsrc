@@ -14,7 +14,7 @@
 #include "main.h"
 #include "DataProcess.h"
 #include "Log.h"
-
+extern int appender_object;
 bool func_int(int tmp)
 {
 		cout<<"tmp:"<<tmp<<endl;
@@ -29,19 +29,20 @@ int main(int argc, char * argv[])
 
 {
 #ifndef WIN32//linux
+
+		if((argc!=2)||(0 != strcmp(argv[1], "-d") && (0 != strcmp(argv[1], "-D")))){
+				cout <<"Linux Daemon mode..." << endl;
+				InitDaemo(argv[0]);
+		}else {
+				appender_object=0;//将日志写到控制台上
+				cout << "Linux DEBUG mode..."	<<endl;
+		}
 		// 打开日志  
 		if (!Log::instance().open_log())  
 		{   
 				std::cout << "Log::open_log() failed" << std::endl;  
 				exit(-1);
 		}   
-
-		if((argc!=2)||(0 != strcmp(argv[1], "-d") && (0 != strcmp(argv[1], "-D")))){
-				cout <<"Linux Daemon mode..." << endl;
-				InitDaemo(argv[0]);
-		}else {
-				cout << "Linux DEBUG mode..."	<<endl;
-		}
 #endif
 
 		/*

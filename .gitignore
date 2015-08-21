@@ -5,3 +5,4 @@ tags
 recv-data-platform
 lightsysd
 err.log
+status.sh

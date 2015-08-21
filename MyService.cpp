@@ -5,6 +5,7 @@
 #include "Log.h"
 
 extern int Startup();
+extern int appender_object;
 
 SERVICE_STATUS          ServiceStatus; 
 SERVICE_STATUS_HANDLE   hStatus;
@@ -198,6 +199,7 @@ void main(int argc, char* argv[])
 		}
 
 	}else if((argc==2) && ((::strcmp(argv[1], "-d")==0)|| (::strcmp(argv[1], "-D")==0))){
+		appender_object=0;//将日志写到控制台上
 		printf("windows DEBUG mode...\n");
 		// 打开日志  
 		if (!Log::instance().open_log())  

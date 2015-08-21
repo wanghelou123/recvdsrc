@@ -66,15 +66,8 @@ extern list<struct gateway_conf> gateway_conf_list;
 
 Gateway::~Gateway()
 {
-
-		work_status=0;
-
 		NOTICE(__func__<<" :"<< gateway_id);
-		sockfd->shutdown(boost::asio::ip::tcp::socket::shutdown_both);
-		NOTICE(__func__<<" :"<< "shutdown.");
-		//	sockfd->close();
-		//	async_timer->cancel();
-		//	wait_timer->cancel();
+		work_status=0;
 		delete sockfd;
 		delete async_timer;
 		delete wait_timer;

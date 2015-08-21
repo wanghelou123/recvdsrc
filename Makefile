@@ -5,7 +5,7 @@
 APP := recv-data-platform
 
 CFLAGS :=  -Wall 
-CFLAGS +=  -D RECVD_VERSION=\"v2.0.11\"
+CFLAGS +=  -D RECVD_VERSION=\"v2.0.12\"
 CFLAGS +=  -D PROGNAME=\"$(APP)\"
 
 ifeq ($(APP),lightsysd)
