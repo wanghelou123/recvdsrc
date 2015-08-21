@@ -4,3 +4,4 @@ tags
 /log
 recv-data-platform
 lightsysd
+err.log

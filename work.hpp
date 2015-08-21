@@ -55,22 +55,12 @@ class worker
 		void do_work()
 		{
 			timer t;
-			unsigned count=0;
 			for(;;)
 			{
 				job_type job;
 				m_queue.wait_and_pop(job);
 				if(!m_func || !m_func(job)) break;
 
-#if 0
-				count++;
-				if(count % 128 == 0){
-					DEBUG("operate 2 gateway,128 records  use:"<< t.elapsed()<<"seconds.");	
-					DEBUG("queue size is: "<< m_queue.size());
-					t.restart();
-					count=0;
-				}
-#endif
 				delete job;
 			}
 		}
