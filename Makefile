@@ -1,11 +1,11 @@
 #照明灯系统
-#APP=lightsysd
+APP=lightsysd
 
 #标准收数软件 
-APP := recv-data-platform
+#APP := recv-data-platform
 
 CFLAGS :=  -Wall 
-CFLAGS +=  -D RECVD_VERSION=\"v2.0.12\"
+CFLAGS +=  -D RECVD_VERSION=\"v2.0.13\"
 CFLAGS +=  -D PROGNAME=\"$(APP)\"
 
 ifeq ($(APP),lightsysd)

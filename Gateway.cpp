@@ -58,6 +58,7 @@ extern list<struct gateway_conf> gateway_conf_list;
 		sockfd = new asio::ip::tcp::socket(ios);
 		async_timer = new asio::deadline_timer( ios, posix_time::seconds(1) );
 		wait_timer = new asio::deadline_timer( ios, posix_time::seconds(1) );
+		memset(gateway_id, '\0', sizeof(gateway_id));
 
 		//定时校准时间
 		targetCorrectTime.target_hour = 23;
@@ -79,7 +80,7 @@ void Gateway::run_client()
 {
 		DEBUG(__func__);
 		if(dns() == false) { 
-				FATAL(__func__<<":DNS failure!");
+				DEBUG(__func__<<":DNS failure!");
 		}
 		sockfd->async_connect(ep, m_strand.wrap(bind(&Gateway::OnConnect, this, asio::placeholders::error)));
 }
@@ -106,7 +107,7 @@ void Gateway::OnConnect(const boost::system::error_code& ec)
 		{ 
 				FATAL(__func__<< ":"<< gateway_id<<":"<<boost::system::system_error(ec).what());
 				if(dns() == false) { 
-						FATAL("DNS failure!");
+						DEBUG("DNS failure!");
 				}
 
 				wait_time();
@@ -346,6 +347,7 @@ void Gateway::SendOnLineCmd(const boost::system::error_code& ec)
 		//15 01 00 00 00 06 ff 01 55 55 00 40
 		if(ec){ 
 				WARNING(__func__ << ":" << gateway_id << ":" << boost::system::system_error(ec).what());
+				NOTICE(__func__<<"work_status:"<< work_status);
 
 				if(0 == work_status){
 						restart(ec);
@@ -356,6 +358,8 @@ void Gateway::SendOnLineCmd(const boost::system::error_code& ec)
 						sockfd->async_write_some(asio::buffer(write_buff,6+write_buff[5]), m_strand.wrap(bind(&Gateway::SendWriteCmdVerification, this, boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred)));
 						return;
 				}
+
+				return;
 		} 
 
 		timer_flag=0;
