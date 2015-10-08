@@ -63,7 +63,13 @@ void UdpServer::handle_receive_from(const boost::system::error_code& ec,
 	GatewayDB db;
 
 	if(crc_check(data_, bytes_sent)==0){
-		FATAL(__func__<<"CRC CHECK ERROR!");
+		FATAL(__func__<<" CRC CHECK ERROR!");
+		memset(data_, '\0', sizeof(data_));
+		socket_.async_receive_from(
+			boost::asio::buffer(data_, max_length), remote_endpoint_,
+			boost::bind(&UdpServer::handle_receive_from, this,
+			boost::asio::placeholders::error,
+			boost::asio::placeholders::bytes_transferred));
 		return;
 	}
 
