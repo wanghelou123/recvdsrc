@@ -53,8 +53,15 @@ void   WriteCmd::GetCmdFromDB( )
 	snprintf(sql, sizeof(sql) - 1, "SELECT * FROM  write_table where cmd_status=0 OR \
 			cmd_status=2 ORDER BY gateway_logo, cmd_status DESC;");	
 
-		memset(gateway_id_bak, '\0', sizeof(gateway_id_bak));				
+	memset(gateway_id_bak, '\0', sizeof(gateway_id_bak));				
 	res = db.SelectData(sql);
+
+	if(res == NULL) {
+		FATAL( "execute sql failed.");		
+		db.DisConnectDB();
+		return;
+	}
+
 	i = db.DBntuples(res);
 	t = db.DBnfields(res);
 
@@ -64,6 +71,8 @@ void   WriteCmd::GetCmdFromDB( )
 		db.DisConnectDB();//断开数据库的连接，直接返回不再注册时器了
 		return ;	
 	}
+
+
 	for(s=0; s<i;s++){
 		memset(gateway_id, '\0', sizeof(gateway_id));
 		strcpy(gateway_id, db.DBgetvalue(res,s,1));

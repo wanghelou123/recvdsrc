@@ -78,13 +78,12 @@ void UdpServer::handle_receive_from(const boost::system::error_code& ec,
 		case 0x01://收到通知：write_table中有命令需要下发	
 			switch(data_[1]){
 				case 0x01:
-					NOTICE("write_table has write cmd\n");
+					NOTICE("write_table has write cmd");
 					p_write_cmd->GetCmdFromDB();
-					NOTICE("execute complete the write cmd\n");
+					NOTICE("execute complete the write cmd");
 					break;
 
 				case 0x02:
-					cout << "correction time" << endl;
 					NOTICE("correction time cmd");
 					p_write_cmd->correctTime();
 					break;

@@ -92,7 +92,9 @@ int main(int argc, char * argv[])
 		init_gateway_object_list(q);
 
 		/*启动客户端，连接网关服务器*/
+#ifdef	RECVD_CLIENT
 		start_client();
+#endif
 
 		/*启动服务器，接收网关客户端上来的连接*/
 		Server MbsServer(io_service_pool_.get_io_service(), q, tcpport);

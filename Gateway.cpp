@@ -67,7 +67,7 @@ extern list<struct gateway_conf> gateway_conf_list;
 
 Gateway::~Gateway()
 {
-		NOTICE(__func__<<" :"<< gateway_id);
+		DEBUG(__func__<<" :"<< gateway_id);
 		work_status=0;
 		delete sockfd;
 		delete async_timer;
@@ -212,7 +212,7 @@ void Gateway::shake_handler(const boost::system::error_code& ec,std::size_t byte
 				}
 		}
 		if(theIterator == gateway_conf_list.end()){//没有该网关的配置
-				WARNING(__func__ << ": can't find the gateway:"<<gateway_logo);
+				DEBUG(__func__ << ": can't find the gateway:"<<gateway_logo);
 				delete this;
 				return;
 		}
