@@ -43,6 +43,7 @@ public:
 		int ConnectDB(const char *pch_dbaddr, int ndbport, const char *pch_dbname, const char *pch_dbuser, const char *pch_dbpasswd, int timeout);
 		int MyconnectDB();
 		void DisConnectDB();
+		int ExecTransaction(const char * sql);
 		int UpdateData(const char *);
 		int DeleteData(const char * sql);
 		int InsertData(const char *);

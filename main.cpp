@@ -21,6 +21,52 @@ bool func_int(int tmp)
 		return true;
 }
 
+
+//照明灯系统测试队列
+static void add_to_queue(queue_type& m_queue)
+{
+	cout << "add_to_queu start..."<<endl;
+	tcp_message_ptr	ref;
+	tcp_message_ptr	ref2;
+	tcp_message_ptr	ref3;
+	int i;
+	int value=174111;
+	for(i=0; i<10000; i++) {
+		ref = new struct tcp_message;
+		memset(ref, '\0', sizeof(struct tcp_message));
+
+		ref->size=33;
+		ref->gw_ID = 7;
+		strcpy(ref->gateway_id, "2442201505149999");
+
+		ref->data[0]=0x15;
+		ref->data[1]=0x01;
+		ref->data[2]=0x00;
+		ref->data[3]=0x00;
+		ref->data[4]=0x00;
+		ref->data[5]=0x1A;
+		ref->data[6]=0x05;
+		ref->data[7]=0x60;
+		ref->data[8]=0x17;
+		memcpy(ref->data+9, &value, 4);
+		strncpy((char*)ref->data+13, "2015-10-16 08:46:45", 20);
+		m_queue.push(ref);
+
+		ref2 = new struct tcp_message;
+		memcpy(ref2, ref, sizeof(struct tcp_message));
+		ref2->gw_ID = 2218;
+		strcpy(ref2->gateway_id, "1100201411290001");
+		m_queue.push(ref2);
+
+		ref3 = new struct tcp_message;
+		memcpy(ref3, ref, sizeof(struct tcp_message));
+		ref3->gw_ID = 2219;
+		strcpy(ref3->gateway_id, "1100201411280020");
+		m_queue.push(ref3);
+	}
+	cout << "add_to_queu end..."<<endl;
+}
+
 #ifdef WIN32 //=====>windows
 int Startup()
 #else //======>linux
@@ -103,6 +149,10 @@ int main(int argc, char * argv[])
 		UdpServer s(io_service_pool_.get_io_service(), udpport, q);
 
 		NOTICE("收数软件"<< RECVD_TYPE << RECVD_VERSION << "启动成功！");
+
+
+		//添加测试数据--@2015-10-15 
+		add_to_queue(q);
 
 
 #ifndef LIGHTSYS
@@ -247,6 +297,7 @@ int  init_gateway_conf(){
 								gateway_id[k] = 0x00;
 				}
 				p_gateway_conf = new struct gateway_conf;
+				p_gateway_conf->gw_ID = atoi(db.DBgetvalue(res, s, 0));                                 
 				p_gateway_conf->work_mode = atoi(db.DBgetvalue(res,s,1));                                 
 				strcpy(p_gateway_conf->gateway_id,gateway_id);		
 				p_gateway_conf->port = atoi(db.DBgetvalue(res,s,2));

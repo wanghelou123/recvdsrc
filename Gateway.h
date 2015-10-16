@@ -30,6 +30,7 @@ typedef boost::asio::io_service::strand   strand_type;
 
 
 struct gateway_conf{
+	int gw_ID;
 	int work_mode;
 	int port;		
 	char gateway_id[50];	//每个网关的唯一标识
@@ -48,6 +49,7 @@ struct correctTime{
 struct tcp_message{
 	unsigned char data[MAX_BUF_SIZE];
 	int size;
+	int gw_ID;
 	char gateway_id[50];	//每个网关的唯一标识
 };
 
@@ -86,6 +88,7 @@ public:
 	void selfCorrectTime(const boost::system::error_code& ec);
 
 public:
+	int gw_ID;
 	int work_mode;
 	int port;		
 	char gateway_id[50];	//每个网关的唯一标识

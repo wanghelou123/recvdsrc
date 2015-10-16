@@ -500,6 +500,7 @@ void Gateway::RecvRequestReturn(const boost::system::error_code& ec, std::size_t
 
 		if(bytes_transferred != 9){
 				ref->size=bytes_transferred;
+				ref->gw_ID = gw_ID;
 				memset(ref->gateway_id, '\0', sizeof(ref->gateway_id));
 				strcpy(ref->gateway_id,gateway_id);
 				m_queue.push(ref);
@@ -617,6 +618,7 @@ void Gateway::recvInitiativeDataReturn(const boost::system::error_code& ec, std:
 				//将接收到的正确的数据包放到队列中
 				if(bytes_transferred != 9){
 						ref->size=bytes_transferred;
+						ref->gw_ID = gw_ID;
 						memset(ref->gateway_id, '\0', sizeof(ref->gateway_id));
 						strcpy(ref->gateway_id,gateway_id);
 						m_queue.push(ref);
@@ -704,6 +706,7 @@ void Gateway::myrecv(const boost::system::error_code& ec,std::size_t bytes_trans
 						&& ref->data[2]==0x00 && ref->data[3]==0x00 && ref->data[4]==0x00 && ref->data[5] == 0x1A ){
 
 				ref->size=bytes_transferred;
+				ref->gw_ID = gw_ID;
 				memset(ref->gateway_id, '\0', sizeof(ref->gateway_id));
 				strcpy(ref->gateway_id,gateway_id);
 				m_queue.push(ref);

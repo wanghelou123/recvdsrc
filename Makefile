@@ -1,8 +1,8 @@
 #照明灯系统
-#APP=lightsysd
+APP=lightsysd
 
 #标准收数软件 
-APP := recv-data-platform
+#APP := recv-data-platform
 
 CFLAGS :=  -Wall 
 CFLAGS +=  -D RECVD_VERSION=\"v2.0.15\"
@@ -15,7 +15,7 @@ else
 CFLAGS +=  -D RECVD_TYPE=\"标准版\"
 endif
 
-INCS = -I/usr/apps/pgsql/include/ 
+INCS = -I/usr/apps/pgsql/include/ -I ./
 LIBS +=  -L/usr/apps/pgsql/lib/ -lpq 
 LIBS += -llog4cplus
 SRC := $(shell ls *.cpp)

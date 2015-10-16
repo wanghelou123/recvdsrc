@@ -65,6 +65,20 @@ void GatewayDB::DisConnectDB()
 	}
 }
 
+//执行事务
+int GatewayDB::ExecTransaction(const char * sql){
+	DBresult *transaction_res = NULL;
+	transaction_res = PQexec(g_pconn, sql);
+	if (PQresultStatus(transaction_res) != PGRES_COMMAND_OK){		
+		FATAL("exec sql failed: "<< sql << "\n" << PQerrorMessage(g_pconn));
+		DBclear(transaction_res);
+		return -1;
+	}
+	DBclear(transaction_res);
+
+	return 0;
+}
+
 
 //更新数据
 int GatewayDB::UpdateData(const char * sql){
