@@ -57,13 +57,13 @@ class worker
 			GatewayDB db;
 			int record_num;
 			time_t record_time,cur_time;
-			double  i_sec;
+			int i_sec;
 
+			job_type job;
 			for(;;)
 			{
-				job_type job;
+				//printf("queue has %d Records.\n", m_queue.size());
 				record_num = m_queue.size()>10000?10000:m_queue.size();//一次事务最多提交10000条记录
-				cout << "record_num=>"<< record_num<<endl;
 				if(record_num == 0) {
 					::sleep(2);
 					continue;
@@ -84,15 +84,16 @@ class worker
 						//存到sqlite中
 						cout << "m_func error"<<endl;
 					}
+					delete job;
 				}
 				//if(!m_func || !m_func(job, db)) break;
-				delete job;
 
 				//db.ExecTransaction("END");
 				///db.ExecTransaction("commit");
 				time(&cur_time);
 				i_sec = difftime( cur_time, record_time);
-				cout << "Use "<< i_sec<< " Seconds."<<endl;
+				//printf("store 10000 Records to Database, use %d Seconds\n", i_sec);
+
 				db.DisConnectDB();
 			}
 

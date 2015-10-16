@@ -203,6 +203,7 @@ void Gateway::shake_handler(const boost::system::error_code& ec,std::size_t byte
 		list<struct gateway_conf>::iterator theIterator;
 		for( theIterator = gateway_conf_list.begin(); theIterator != gateway_conf_list.end(); theIterator++ ){
 				if(0 == strcmp(gateway_logo,theIterator->gateway_id)){
+						this->gw_ID = theIterator->gw_ID;
 						this->work_mode=theIterator->work_mode;
 						this->port=theIterator->port;
 						strcpy(this->gateway_id, gateway_logo);
@@ -701,7 +702,7 @@ void Gateway::myrecv(const boost::system::error_code& ec,std::size_t bytes_trans
 
 				return;  
 		}
-		cout << __func__ << ": recv bytes:"<< bytes_transferred<<endl;
+		//cout << __func__ << ": recv bytes:"<< bytes_transferred<<endl;
 		if(bytes_transferred == 33 && ref->data[0]==0x15 && ref->data[1] == 0x01 \
 						&& ref->data[2]==0x00 && ref->data[3]==0x00 && ref->data[4]==0x00 && ref->data[5] == 0x1A ){
 
@@ -712,7 +713,7 @@ void Gateway::myrecv(const boost::system::error_code& ec,std::size_t bytes_trans
 				m_queue.push(ref);
 				sockfd->async_write_some(asio::buffer(mysend_buf_success,8), m_strand.wrap(bind(&Gateway::mysendVerification,\
 												this, boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred)));
-				cout << __func__ << ":send over"<<endl;
+				//cout << __func__ << ":send over"<<endl;
 		}else if(bytes_transferred == 12 && ref->data[0]==0x15 && ref->data[1] == 0x01 && ref->data[5] == 0x06 &&\
 						ref->data[6] == 0xff && ref->data[7] == 0x10 && ref->data[9] == 0x31&& ref->data[11] == 0x0A){   /*对时命令成功*/
 				//正确响应包：15 01  00 00  00 06  FF   10   00 31   00 0A

@@ -35,7 +35,8 @@ static void add_to_queue(queue_type& m_queue)
 		ref = new struct tcp_message;
 		memset(ref, '\0', sizeof(struct tcp_message));
 
-		ref->size=33;
+		//ref->size=33;
+		ref->size=71;
 		ref->gw_ID = 7;
 		strcpy(ref->gateway_id, "2442201505149999");
 
@@ -54,13 +55,15 @@ static void add_to_queue(queue_type& m_queue)
 
 		ref2 = new struct tcp_message;
 		memcpy(ref2, ref, sizeof(struct tcp_message));
-		ref2->gw_ID = 2218;
+		//ref2->gw_ID = 2218;
+		ref2->gw_ID = 40;
 		strcpy(ref2->gateway_id, "1100201411290001");
 		m_queue.push(ref2);
 
 		ref3 = new struct tcp_message;
 		memcpy(ref3, ref, sizeof(struct tcp_message));
-		ref3->gw_ID = 2219;
+		//ref3->gw_ID = 2219;
+		ref3->gw_ID = 39;
 		strcpy(ref3->gateway_id, "1100201411280020");
 		m_queue.push(ref3);
 	}
@@ -152,13 +155,14 @@ int main(int argc, char * argv[])
 
 
 		//添加测试数据--@2015-10-15 
-		add_to_queue(q);
+		//add_to_queue(q);
 
 
-#ifndef LIGHTSYS
+#ifdef LIGHTSYS
+		cout << "worker thread only 1."	<<endl;
 		worker<queue_type> w(q, handle_msg,10);
 #else
-		worker<queue_type> w(q, handle_msg,1);
+		worker<queue_type> w(q, handle_msg,10);
 #endif
 		w.start();
 

@@ -236,7 +236,7 @@ bool handle_msg(tcp_message_ptr& p, GatewayDB &db)
 		//cout << sql2<<endl;
 		db.InsertData(sql1);
 		db.InsertData(sql2);
-		db.DeleteData(sql4);
+		//db.DeleteData(sql4);
 
 		return true;
 }
