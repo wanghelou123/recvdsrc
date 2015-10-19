@@ -62,7 +62,7 @@ class worker
 			job_type job;
 			for(;;)
 			{
-				//printf("queue has %d Records.\n", m_queue.size());
+				printf("queue has %d Records.\n", m_queue.size());
 				record_num = m_queue.size()>10000?10000:m_queue.size();//一次事务最多提交10000条记录
 				if(record_num == 0) {
 					::sleep(2);
@@ -92,7 +92,7 @@ class worker
 				///db.ExecTransaction("commit");
 				time(&cur_time);
 				i_sec = difftime( cur_time, record_time);
-				//printf("store 10000 Records to Database, use %d Seconds\n", i_sec);
+				printf("store 10000 Records to Database, use %d Seconds\n", i_sec);
 
 				db.DisConnectDB();
 			}

@@ -62,6 +62,7 @@ int AlterConf::AddGateway(char * tmp_gateway_logo, queue_type& m_queue)
 
 	struct gateway_conf  *p_gateway_conf=new struct gateway_conf;
 
+	p_gateway_conf->gw_ID = atoi(db.DBgetvalue(res, 0, 0));                                 
 	p_gateway_conf->work_mode = atoi(db.DBgetvalue(res,0,1));
 	strcpy(p_gateway_conf->gateway_id,gateway_id);
 	p_gateway_conf->port = atoi(db.DBgetvalue(res,0,2));
@@ -80,6 +81,7 @@ int AlterConf::AddGateway(char * tmp_gateway_logo, queue_type& m_queue)
 
 	if(0 == p_gateway_conf->work_mode){
 		p_gateway = new Gateway(io_service_pool_.get_io_service(), m_queue);
+		p_gateway->gw_ID= p_gateway_conf->gw_ID;
 		p_gateway->work_mode = p_gateway_conf->work_mode;
 		strcpy(p_gateway->gateway_id,p_gateway_conf->gateway_id);
 		p_gateway->port = p_gateway_conf->port;
@@ -141,6 +143,7 @@ int	AlterConf::ModiGateway(char * tmp_gateway_logo)
 	if(theIterator2 == gateway_object_list.end()){//没有该网关的配置
 		return -1;
 	}else{
+		(*theIterator2)->gw_ID=theIterator->gw_ID;
 		(*theIterator2)->port=theIterator->port;
 		(*theIterator2)->pool_interval=theIterator->pool_interval;
 		(*theIterator2)->timeout=theIterator->timeout;

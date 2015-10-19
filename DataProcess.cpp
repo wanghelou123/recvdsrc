@@ -199,7 +199,7 @@ bool handle_msg(tcp_message_ptr& p, GatewayDB &db)
 		memset(tmp2, '\0', sizeof(tmp2));
 
 		try{		
-#if 1
+#if 0
 			if(record_flag == 0){
 				snprintf(sql3, sizeof(sql3) - 1, \
 				"delete from  data  where  gateway_logo='%s' and sensor_name=%d ;",\

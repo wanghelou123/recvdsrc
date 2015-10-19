@@ -155,12 +155,12 @@ int main(int argc, char * argv[])
 
 
 		//添加测试数据--@2015-10-15 
-		//add_to_queue(q);
+		add_to_queue(q);
 
 
 #ifdef LIGHTSYS
 		cout << "worker thread only 1."	<<endl;
-		worker<queue_type> w(q, handle_msg,10);
+		worker<queue_type> w(q, handle_msg,1);
 #else
 		worker<queue_type> w(q, handle_msg,10);
 #endif
