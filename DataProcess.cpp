@@ -155,7 +155,7 @@ bool handle_msg(tcp_message_ptr& p)
 		return true;
 }
 #else
-bool handle_msg(tcp_message_ptr& p, GatewayDB &db)
+bool handle_msg(GatewayDB &db, tcp_message_ptr& p, bool is_delete)
 {
 	if(p == NULL)return true;
 	
@@ -199,8 +199,7 @@ bool handle_msg(tcp_message_ptr& p, GatewayDB &db)
 		memset(tmp2, '\0', sizeof(tmp2));
 
 		try{		
-#if 0
-			if(record_flag == 0){
+			if(record_flag == 0 && is_delete==true){
 				snprintf(sql3, sizeof(sql3) - 1, \
 				"delete from  data  where  gateway_logo='%s' and sensor_name=%d ;",\
 						 p->gateway_id,p->data[6]);
@@ -208,7 +207,6 @@ bool handle_msg(tcp_message_ptr& p, GatewayDB &db)
 				record_flag=1;
 				db.DeleteData(sql3);
 			}
-#endif
 			snprintf(tmp1, sizeof(tmp1) - 1, \ 
 			"(to_timestamp('%s', 'YYYY-MM-DD HH24:MI:SS'), \
 					'%s', %d, %d, %.3f, %d),", \
@@ -234,9 +232,12 @@ bool handle_msg(tcp_message_ptr& p, GatewayDB &db)
 		//cout << "sql2 length = "<< strlen(sql2) << endl;
 		//cout << sql1<<endl;
 		//cout << sql2<<endl;
-		db.InsertData(sql1);
-		db.InsertData(sql2);
-		//db.DeleteData(sql4);
+
+		db.InsertData(sql2);//插入历史数据
+		if(is_delete == true) {
+				db.InsertData(sql1);//插入实时数据
+				//db.DeleteData(sql4);//删除超出限制的历史数据
+		}
 
 		return true;
 }

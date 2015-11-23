@@ -155,7 +155,7 @@ int main(int argc, char * argv[])
 
 
 		//添加测试数据--@2015-10-15 
-		add_to_queue(q);
+		//add_to_queue(q);
 
 
 #ifdef LIGHTSYS

@@ -13,7 +13,7 @@ class worker
 	public:
 		typedef Queue queue_type;
 		typedef typename Queue::job_type job_type;
-		typedef boost::function<bool(job_type&, GatewayDB&)> func_type;
+		typedef boost::function<bool(GatewayDB&, job_type&,bool)> func_type;
 	private:
 		queue_type& m_queue;
 		func_type m_func;
@@ -58,16 +58,19 @@ class worker
 			int record_num;
 			time_t record_time,cur_time;
 			int i_sec;
+			bool is_delete;
 
 			job_type job;
 			for(;;)
 			{
-				printf("queue has %d Records.\n", m_queue.size());
+				//printf("queue has %d Records.\n", m_queue.size());
 				record_num = m_queue.size()>10000?10000:m_queue.size();//一次事务最多提交10000条记录
 				if(record_num == 0) {
 					::sleep(2);
 					continue;
 				}
+
+				is_delete = record_num<=8000 ? true : false;
 
 				if(-1 == db.ConnectDB(dbaddr, dbport, dbname, dbuser, dbpwd, 60)){
 					FATAL("connect database failed!");
@@ -80,7 +83,7 @@ class worker
 				//db.ExecTransaction("begin transaction");
 
 				while(m_queue.try_pop(job) && record_num-- > 0  ) {
-					if(!m_func(job, db)) {
+					if(!m_func(db, job, is_delete)) {
 						//存到sqlite中
 						cout << "m_func error"<<endl;
 					}
@@ -92,7 +95,7 @@ class worker
 				///db.ExecTransaction("commit");
 				time(&cur_time);
 				i_sec = difftime( cur_time, record_time);
-				printf("store 10000 Records to Database, use %d Seconds\n", i_sec);
+				//printf("store 10000 Records to Database, use %d Seconds\n", i_sec);
 
 				db.DisConnectDB();
 			}
