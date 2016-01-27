@@ -162,7 +162,7 @@ int main(int argc, char * argv[])
 		cout << "worker thread only 1."	<<endl;
 		worker<queue_type> w(q, handle_msg,1);
 #else
-		worker<queue_type> w(q, handle_msg,10);
+		worker<queue_type> w(q, handle_msg,1);
 #endif
 		w.start();
 
